@@ -1,4 +1,3 @@
-#define _GNU_SOURCE
 #include <stdio.h>
 #include <stdlib.h>
 #include <assert.h>
@@ -21,6 +20,7 @@ int main(int argc, char **argv)
 	int rate = 0;
 	int sample_size = 0;
 	int i = 0;
+	char buffer[10240];
 	double start = 0;
 	double finish = 0;
 	unsigned long start_sample = 0;
@@ -52,25 +52,16 @@ int main(int argc, char **argv)
 
 
 	index = 0;
-	finish = 0; /* FIXME we assume first track starts at beginning of file */
-	while ( ( items = fscanf(stdin, "%d:%d:%d\n", &m, &s, &frame) ) != EOF )
+	items = fscanf(stdin, "%d:%d:%d\n", &m, &s, &frame); /* FIXME doesn't check return value */
+	start = (double)m*60 + (double)s + ((double)frame)/75;
+
+	/* FIXME duplication of code to get  mm:ss:ff */
+	while ( ( items = fscanf(stdin, "%d:%d:%d\n", &m, &s, &frame) ) )
 	{
 		index++;
-		/* Following track starts at end of last */
-		if (items != 3)
-		{
-			fprintf(stderr, "Timestamp #%d malformed\n", index);
-			break;
-		}
-		start = finish;
-		finish = (double)m*60 + (double)s + ((double)frame)/75;
-
-		fprintf(stderr, "Track %d starts %f s, finishes %f s\n", index, start, finish);
-
 		sprintf(out_fname, "track_%04d", index);
 
-
-		/* Open it up */
+		/* Open output file */
 		if ((fout = fopen(out_fname, "w")) == NULL)
 		{
 			fprintf(stderr,"Failed to open '%s': ", out_fname);
@@ -78,25 +69,61 @@ int main(int argc, char **argv)
 			return EXIT_FAILURE;
 		}
 
-		start_sample = start * (double)rate * channels;
-		finish_sample = finish * (double)rate * channels;
 
-
-		/* Seek to first sample and write until last sample */
-		fseek(fin, start_sample*sample_size, SEEK_SET);
-
-		/* FIXME put this declaration at top */
-		char buffer[10240];
-		for (i = (int)start_sample; i < (int)finish_sample; )
+		/* EOF means this is the last track; run it to end of input file */
+		if (items == EOF)
 		{
-			/* FIXME unnecessary call to fwrite with items == 0 possible */
-			if ((items = fread(buffer, sample_size, sizeof(buffer)/sample_size, fin)))
-				fwrite(buffer, items, sample_size, fout);
-
-			i += items;
+			finish = -1;
+		} else {
+			/* Following track starts at end of last */
+			if (items != 3)
+			{
+				fprintf(stderr, "Timestamp #%d malformed\n", index);
+				break;
+			}
+			finish = (double)m*60 + (double)s + ((double)frame)/75;
 		}
+		fprintf(stderr, "Track %d starts %f s, finishes %f s\n", index, start, finish);
 
+		start_sample = start * rate * channels;
+		finish_sample = finish * rate * channels;
+
+
+		/* Seek to first sample of track */
+		fseek(fin, (start_sample * sample_size), SEEK_SET);
+
+		if (finish >= 0)
+		{
+			for (i = (int)start_sample; i < (int)finish_sample; i += items)
+			{
+				/* FIXME unnecessary call to fwrite with items == 0 possible */
+				/* FIXME Handle EOF properly, silly! */
+				if ((items = fread(buffer, sample_size, sizeof(buffer)/sample_size, fin)))
+				{
+					if (feof(fin))
+						break;
+					fwrite(buffer, items, sample_size, fout);
+				}
+			}
+		} else {
+			printf("Running to EOF\n");
+			for (i = (int)start_sample; ; i += items)
+			{
+				/* FIXME unnecessary call to fwrite with items == 0 possible */
+				if ((items = fread(buffer, sample_size, sizeof(buffer)/sample_size, fin)))
+				{
+					if (feof(fin))
+						break;
+					fwrite(buffer, items, sample_size, fout);
+				}
+			}
+
+		}
 		fclose(fout);
+		start = finish;
+
+		if (finish < 0)
+			break;
 	}
 }
 
