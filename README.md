@@ -11,8 +11,6 @@ Warning
 -------
 Try running `grep -i FIXME *.c`
 
-**This will overwrite any existing file with the same name as an output file**
-
 
 Sample Usage
 ------------
@@ -20,7 +18,8 @@ Assuming you want to use the first indices of each track as a boundary,
 
 	grep "INDEX 01" cue-file | \
 	  sed -e 's/INDEX 01//g' | \
-	  cue-bin-split raw-file channels samples-rate bytes-per-sample
+	  cue-bin-split raw-file channels samples-rate bytes-per-sample name-format
 
-will output a bunch of files track_0001 through track_nnnn.
-You might then push them through ffmpeg or something to get them to another format.
+Where format is something like `track_%04d`.
+This will output a bunch of files named accordingly.
+You might then push them through ffmpeg or something to get them to another audio format.

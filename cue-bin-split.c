@@ -33,8 +33,9 @@ int main(int argc, char **argv)
 {
 	FILE *fin = NULL;
 	FILE *fout = NULL;
+	char *format = NULL;
 	char *in_fname = NULL;
-	char out_fname[] = "track-0000";
+	char out_fname[] = "track-000000000000"; /* That should do it */
 	int m = 0;
 	int s = 0;
 	int frame = 0;
@@ -53,17 +54,19 @@ int main(int argc, char **argv)
 
 	/* FIXME Use getopt */
 	/* FIXME Replace assertions with useful checks+messages */
-	assert(argc == 5);
+	assert(argc == 6);
 
 	in_fname = argv[1];
 	channels = atoi(argv[2]);
 	rate = atoi(argv[3]);
 	sample_size = atoi(argv[4]);
+	format = argv[5];
 
 	assert(channels > 0);
 	assert(rate > 0);
 	assert(sample_size > 0);
 	assert(in_fname != NULL);
+	assert(format != NULL);
 
 	/* Open it up */
 	if ((fin = fopen(in_fname, "r")) == NULL)
@@ -83,13 +86,22 @@ int main(int argc, char **argv)
 	while ( ( items = fscanf(stdin, "%d:%d:%d\n", &m, &s, &frame) ) )
 	{
 		index++;
-		sprintf(out_fname, "track_%04d", index);
+
+		i = snprintf(out_fname, sizeof(out_fname), format, index);
+		if (i == sizeof(out_fname))
+		{
+			fprintf(stderr, "Filename too large for buffer\n");
+			fclose(fin);
+			return EXIT_FAILURE;
+		}
+
 
 		/* Open output file */
 		if ((fout = fopen(out_fname, "w")) == NULL)
 		{
 			fprintf(stderr,"Failed to open '%s': ", out_fname);
 			perror("fopen");
+			fclose(fin);
 			return EXIT_FAILURE;
 		}
 
@@ -148,5 +160,6 @@ int main(int argc, char **argv)
 		if (finish < 0)
 			break;
 	}
+	return 0;
 }
 
