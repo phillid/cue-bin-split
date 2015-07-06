@@ -33,22 +33,6 @@
 #include "cue-bin-split.h"
 #include "misc.h"
 
-
-/* FIXME move me */
-void die_help()
-{
-	fprintf(stderr,
-		"\n"
-		"Options: \n"
-		"  -r bitrate_Hz\n"
-		"  -c channel_count\n"
-		"  -i input_file\n"
-		"  -s size of a single channel's sample (bytes)\n"
-		"  -f name_format (%%d and co are replaced with track number)\n"
-	);
-	exit(EXIT_FAILURE);
-}
-
 int main(int argc, char **argv)
 {
 	/* File handles */
@@ -85,26 +69,12 @@ int main(int argc, char **argv)
 	{
 		switch (opt)
 		{
-			case 'r':
-				rate = atoi(optarg);
-				break;
-			
-			case 'c':
-				channels = atoi(optarg);
-				break;
-			
-			case 'i':
-				in_fname = optarg;
-				break;
-			
-			case 's':
-				sample_size = atoi(optarg);
-				break;
-				
-			case 'f':
-				format = optarg;
-				break;
-			
+			case 'r': rate = atoi(optarg); break;
+			case 'c': channels = atoi(optarg); break;
+			case 's': sample_size = atoi(optarg); break;
+			case 'i': in_fname = optarg; break;
+			case 'f': format = optarg; break;
+
 			case '?':
 			default:
 				die_help();

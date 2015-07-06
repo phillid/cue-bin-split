@@ -27,13 +27,15 @@
 
 #include "misc.h"
 
+/* Grabs a 'mm:ss:ff' stamp from stdin */
 int get_stamp(int *m, int *s, int *f)
 {
-	int foo = 0;
-	foo = fscanf(stdin, "%d:%d:%d\n", m, s, f);
-	return foo;
+	return fscanf(stdin, "%d:%d:%d\n", m, s, f);
 }
 
+/* Constructs an output filename in the specified buffer based on the given format and track number
+ * Main purpose is to catch buffer overflow with snprintf
+ */
 void construct_out_name(char *buffer, size_t buffer_size, char* format, unsigned int track)
 {
 	if (snprintf(buffer, buffer_size, format, track) == buffer_size)
@@ -42,4 +44,21 @@ void construct_out_name(char *buffer, size_t buffer_size, char* format, unsigned
 		return EXIT_FAILURE;
 	}
 	return EXIT_SUCCESS;
+}
+
+/* Displays the help/syntax message and dies
+ * Does what it says on the tin
+ */
+void die_help()
+{
+	fprintf(stderr,
+		"\n"
+		"Options: \n"
+		"  -r bitrate_Hz\n"
+		"  -c channel_count\n"
+		"  -i input_file\n"
+		"  -s size of a single channel's sample (bytes)\n"
+		"  -f name_format (%%d and co are replaced with track number)\n"
+	);
+	exit(EXIT_FAILURE);
 }
