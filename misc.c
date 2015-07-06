@@ -38,11 +38,12 @@ double get_sec()
 	/* EOF means this is the last track; return invalid time */
 	if (items == EOF)
 	{
-		return -1;
+		return -1.f;
 	}
 
 	if (items != 3)
 	{
+		/* FIXME doesn't explicitly close fin from cue-bin-split.c upon exit() */
 		fprintf(stderr, "Timestamp malformed\n");
 		exit(EXIT_FAILURE);
 	}
