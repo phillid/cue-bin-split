@@ -3,14 +3,17 @@
 .POSIX:
 include config.mk
 
-OBJECTS = cue-bin-split.o
+OBJECTS = \
+	cue-bin-split.o \
+	timestamp.o
+
 CFLAGS += -Wall -Werror
 
 
 all: cue-bin-split
 
 cue-bin-split: $(OBJECTS)
-	$(CC) -o $(EXEC_NAME) $< $(LDFLAGS)
+	$(CC) -o $(EXEC_NAME) $^ $(LDFLAGS)
 
 %.o: %.c
 	$(CC) -c -o $@ $< $(CFLAGS)

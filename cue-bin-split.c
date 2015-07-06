@@ -28,48 +28,103 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <assert.h>
+#include <getopt.h>
+
+#include "cue-bin-split.h"
+#include "timestamp.h"
+
+
+/* FIXME move me */
+void die_help()
+{
+	fprintf(stderr,
+		"Options: \n"
+		"  -r bitrate_Hz\n"
+		"  -c channel_count\n"
+		"  -i input_file\n"
+		"  -s size of a single channel's sample (bytes)\n"
+		"  -f name_format (%%d and co are replaced with track number)\n"
+	);
+	exit(EXIT_FAILURE);
+}
 
 int main(int argc, char **argv)
 {
+	/* File handles */
 	FILE *fin = NULL;
 	FILE *fout = NULL;
+	
+	/* Command line options */
 	char *format = NULL;
 	char *in_fname = NULL;
-	char out_fname[] = "track-000000000000"; /* That should do it */
-	int m = 0;
-	int s = 0;
-	int frame = 0;
-	int index = 0;
-	int items = 0;
 	int channels = 0;
 	int rate = 0;
 	int sample_size = 0;
+	
+	/* Misc */
+	char out_fname[] = "track-000000000000"; /* That should do it */
+	int index = 0;
+	int items = 0;
 	int i = 0;
-	char buffer[10240];
-	double start = 0;
-	double finish = 0;
+	char buffer[BUFFER_SIZE];
+
+	/* Timestamp building blocks */
+	int mm = 0;
+	int ss = 0;
+	int ff = 0;
+
+	/* Boundaries */
+	double start_sec = 0;
+	double finish_sec = 0;
 	unsigned long start_sample = 0;
 	unsigned long finish_sample = 0;
 
 
-	/* FIXME Use getopt */
-	/* FIXME Replace assertions with useful checks+messages */
-	assert(argc == 6);
+	/* FIXME move me */
+	char c;
+	
+	while ( ( c = getopt(argc, argv, "r:c:i:s:f:") ) != -1 )
+	{
+		switch (c)
+		{
+			case 'r':
+				rate = atoi(optarg);
+				break;
+			
+			case 'c':
+				channels = atoi(optarg);
+				break;
+			
+			case 'i':
+				in_fname = optarg;
+				break;
+			
+			case 's':
+				sample_size = atoi(optarg);
+				break;
+				
+			case 'f':
+				format = optarg;
+				break;
+			
+			case '?':
+			default:
+				die_help();
+				break;
+		}
+	}
 
-	in_fname = argv[1];
-	channels = atoi(argv[2]);
-	rate = atoi(argv[3]);
-	sample_size = atoi(argv[4]);
-	format = argv[5];
 
-	assert(channels > 0);
-	assert(rate > 0);
-	assert(sample_size > 0);
-	assert(in_fname != NULL);
-	assert(format != NULL);
+	if (channels <= 0 ||
+	    rate <= 0 ||
+	    sample_size <= 0)
+	{
+		fprintf(stderr, "Channel count, bitrate and sample size must all be positive\n");
+		return EXIT_FAILURE;
+	}
 
 	/* Open it up */
-	if ((fin = fopen(in_fname, "r")) == NULL)
+	if ((fin = fopen(in_fname, "r")) == NULL) 
 	{
 		fprintf(stderr,"Failed to open '%s': ", in_fname);
 		perror("fopen");
@@ -79,11 +134,10 @@ int main(int argc, char **argv)
 
 
 	index = 0;
-	items = fscanf(stdin, "%d:%d:%d\n", &m, &s, &frame); /* FIXME doesn't check return value */
-	start = (double)m*60 + (double)s + ((double)frame)/75;
+	items = get_stamp(&mm, &ss, &ff); /* FIXME doesn't check return value */
+	start_sec = (double)mm*60 + (double)ss + ((double)ff)/FRAMES_PER_SEC;
 
-	/* FIXME duplication of code to get  mm:ss:ff */
-	while ( ( items = fscanf(stdin, "%d:%d:%d\n", &m, &s, &frame) ) )
+	while ( ( items = get_stamp(&mm, &ss, &ff) ) )
 	{
 		index++;
 
@@ -109,7 +163,7 @@ int main(int argc, char **argv)
 		/* EOF means this is the last track; run it to end of input file */
 		if (items == EOF)
 		{
-			finish = -1;
+			finish_sec = -1;
 		} else {
 			/* Following track starts at end of last */
 			if (items != 3)
@@ -117,18 +171,18 @@ int main(int argc, char **argv)
 				fprintf(stderr, "Timestamp #%d malformed\n", index);
 				break;
 			}
-			finish = (double)m*60 + (double)s + ((double)frame)/75;
+			finish_sec = (double)mm*60 + (double)ss + ((double)ff)/75;
 		}
-		fprintf(stderr, "Track %d starts %f s, finishes %f s\n", index, start, finish);
+		fprintf(stderr, "Track %d starts %f s, finishes %f s\n", index, start_sec, finish_sec);
 
-		start_sample = start * rate * channels;
-		finish_sample = finish * rate * channels;
+		start_sample = start_sec * rate * channels;
+		finish_sample = finish_sec * rate * channels;
 
 
 		/* Seek to first sample of track */
 		fseek(fin, (start_sample * sample_size), SEEK_SET);
 
-		if (finish >= 0)
+		if (finish_sec >= 0)
 		{
 			for (i = (int)start_sample; i < (int)finish_sample; i += items)
 			{
@@ -155,9 +209,9 @@ int main(int argc, char **argv)
 
 		}
 		fclose(fout);
-		start = finish;
+		start_sec = finish_sec;
 
-		if (finish < 0)
+		if (finish_sec < 0)
 			break;
 	}
 	return 0;

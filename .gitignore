@@ -4,3 +4,4 @@ track_*
 *.bin
 *.cue
 *.sh
+*.raw
