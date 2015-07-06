@@ -148,13 +148,16 @@ int main(int argc, char **argv)
 			              MIN(sizeof(buffer)/sample_size, (finish_sample - i)),
 			              fin);
 
-			if (feof(fin))
-				break;
-
-			if (ferror(fin))
+			if (items == 0)
 			{
-				perror("fread");
-				break;
+				if (feof(fin))
+					break;
+
+				if (ferror(fin))
+				{
+					perror("fread");
+					break;
+				}
 			}
 
 			if (fwrite(buffer, sample_size, items, fout) != items)
