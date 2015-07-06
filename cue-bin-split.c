@@ -33,14 +33,14 @@ int main(int argc, char **argv)
 	/* File handles */
 	FILE *fin = NULL;
 	FILE *fout = NULL;
-	
+
 	/* Command line options */
 	char *format = NULL;
 	char *in_fname = NULL;
 	int channels = 0;
 	int rate = 0;
 	int sample_size = 0;
-	
+
 	/* Misc */
 	char opt = 0;
 	char out_fname[1024]; /* That should do it. Note: overflow IS caught */
@@ -49,17 +49,12 @@ int main(int argc, char **argv)
 	unsigned long i = 0;
 	char buffer[BUFFER_SIZE];
 
-	/* Timestamp building blocks */
-	int mm = 0;
-	int ss = 0;
-	int ff = 0;
-
 	/* Boundaries */
 	double start_sec = 0;
 	double finish_sec = 0;
 	unsigned long start_sample = 0;
 	unsigned long finish_sample = 0;
-	
+
 	while ( ( opt = getopt(argc, argv, "r:c:i:s:f:") ) != -1 )
 	{
 		switch (opt)
@@ -93,7 +88,7 @@ int main(int argc, char **argv)
 	}
 
 	/* Open it up */
-	if ((fin = fopen(in_fname, "r")) == NULL) 
+	if ((fin = fopen(in_fname, "r")) == NULL)
 	{
 		fprintf(stderr,"Failed to open '%s': ", in_fname);
 		perror("fopen");
@@ -101,14 +96,27 @@ int main(int argc, char **argv)
 	}
 
 	track = 0;
-	items = get_stamp(&mm, &ss, &ff); /* FIXME doesn't check return value */
-	start_sec = mm*60 + ss + ((double)ff)/FRAMES_PER_SEC;
+	start_sec = get_sec();
 
-	while ( ( items = get_stamp(&mm, &ss, &ff) ) )
+	/* Start time can't be unspecified, only finish */
+	if (start_sec < 0)
+	{
+		fprintf(stderr, "ERROR: At least one start timestamp must be specified\n");
+		return EXIT_FAILURE;
+	}
+
+	/* finish_sample equals ULONG_MAX if a run was to EOF (the last track) */
+	while ( finish_sample != ULONG_MAX )
 	{
 		track++;
-
 		construct_out_name(out_fname, sizeof(out_fname), format, track);
+		finish_sec = get_sec();
+
+		printf("%s starts %f s, finishes ", out_fname, start_sec);
+		if (finish_sec < 0)
+			printf("EOF\n");
+		else
+			printf("%f s\n", finish_sec);
 
 		/* Open output file */
 		if ((fout = fopen(out_fname, "w")) == NULL)
@@ -117,22 +125,6 @@ int main(int argc, char **argv)
 			perror("fopen");
 			fclose(fin);
 			return EXIT_FAILURE;
-		}
-
-		/* EOF means this is the last track; run it to end of input file */
-		if (items == EOF)
-		{
-			finish_sec = -1;
-			printf("%s starts %f s, finished EOF\n", out_fname, start_sec);
-		} else {
-			/* Following track starts at end of last */
-			if (items != 3)
-			{
-				fprintf(stderr, "Timestamp #%d malformed\n", track);
-				break;
-			}
-			finish_sec = mm*60 + ss + ((double)ff)/75;
-			printf("%s starts %f s, finishes %f s\n", out_fname, start_sec, finish_sec);
 		}
 
 		start_sample = start_sec * rate * channels;
@@ -151,29 +143,30 @@ int main(int argc, char **argv)
 
 		for (i = start_sample; i < finish_sample; i += items)
 		{
-			/* FIXME perror on items == 0 after read */
 			items = fread(buffer,
 			              sample_size,
 			              MIN(sizeof(buffer)/sample_size, (finish_sample - i)),
 			              fin);
+
 			if (feof(fin))
 				break;
 
-			if ( fwrite(buffer, sample_size, items, fout) != items)
+			if (ferror(fin))
+			{
+				perror("fread");
+				break;
+			}
+
+			if (fwrite(buffer, sample_size, items, fout) != items)
 			{
 				fprintf(stderr, "Write to %s failed: ", out_fname);
 				perror("fwrite");
 				break;
 			}
 		}
-
 		fclose(fout);
 		start_sec = finish_sec;
-
-		/* finish_sample was ULONG_MAX if this was a run to EOF (last track) 
-		 * so don't bother looping around */
-		if (finish_sample == ULONG_MAX)
-			break;
 	}
+	fclose(fin);
 	return 0;
 }

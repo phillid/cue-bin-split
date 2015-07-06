@@ -28,9 +28,25 @@
 #include "misc.h"
 
 /* Grabs a 'mm:ss:ff' stamp from stdin */
-int get_stamp(int *m, int *s, int *f)
+double get_sec()
 {
-	return fscanf(stdin, "%d:%d:%d\n", m, s, f);
+	int mm = 0;
+	int ss = 0;
+	int ff = 0;
+	int items = fscanf(stdin, "%d:%d:%d\n", &mm, &ss, &ff);
+
+	/* EOF means this is the last track; return invalid time */
+	if (items == EOF)
+	{
+		return -1;
+	}
+
+	if (items != 3)
+	{
+		fprintf(stderr, "Timestamp malformed\n");
+		exit(EXIT_FAILURE);
+	}
+	return SEC_FROM_TS(mm, ss, ff);
 }
 
 /* Constructs an output filename in the specified buffer based on the given format and track number

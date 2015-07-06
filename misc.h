@@ -31,9 +31,13 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#define MIN(a, b) ((a < b)? a : b)
+#include "cue-bin-split.h"
 
-int get_stamp(int *m, int *s, int *f);
+/* MIN is surely defined in a standard header */
+#define MIN(a, b) ((a < b)? a : b)
+#define SEC_FROM_TS(mm, ss, ff) (mm*60 + ss + ((double)ff)/FRAMES_PER_SEC)
+
+double get_sec();
 void construct_out_name(char *buffer, size_t buffer_size, char* format, unsigned int track);
 void die_help();
 
