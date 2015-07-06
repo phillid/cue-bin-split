@@ -62,6 +62,7 @@ int main(int argc, char **argv)
 	int sample_size = 0;
 	
 	/* Misc */
+	char opt = 0;
 	char out_fname[] = "track-000000000000"; /* That should do it */
 	int index = 0;
 	int items = 0;
@@ -78,14 +79,10 @@ int main(int argc, char **argv)
 	double finish_sec = 0;
 	unsigned long start_sample = 0;
 	unsigned long finish_sample = 0;
-
-
-	/* FIXME move me */
-	char c;
 	
-	while ( ( c = getopt(argc, argv, "r:c:i:s:f:") ) != -1 )
+	while ( ( opt = getopt(argc, argv, "r:c:i:s:f:") ) != -1 )
 	{
-		switch (c)
+		switch (opt)
 		{
 			case 'r':
 				rate = atoi(optarg);
