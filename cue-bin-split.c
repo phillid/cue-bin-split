@@ -64,7 +64,7 @@ int main(int argc, char **argv)
 	
 	/* Misc */
 	char opt = 0;
-	char out_fname[] = "track-000000000000"; /* That should do it */
+	char out_fname[1024]; /* That should do it. Note: overflow IS caught */
 	int track = 0;
 	int items = 0;
 	int i = 0;
