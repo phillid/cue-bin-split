@@ -7,19 +7,27 @@ This tool takes a list of times (mm:ss:ff) from stdin and (blindly) outputs file
 **It will overwrite any existing file with the same name**
 
 
-Warning
--------
-Try running `grep -i FIXME *.c`
+Usage
+-----
+
+	Options:
+	  -r bitrate_Hz
+	  -c channel_count
+	  -i input_file
+	  -s size of a single channel's sample (bytes)
+	  -f name_format (%d and co are replaced with track number)
 
 
 Sample Usage
 ------------
-Assuming you want to use the first indices of each track as a boundary,
+Assuming you want to use the first indices of each track as a boundary and were chopping up a 44100 Hz, two channel, 16 bit audio stream,
 
-	grep "INDEX 01" cue-file | \
+	grep "INDEX 01" audio.cue | \
 	  sed -e 's/INDEX 01//g' | \
-	  cue-bin-split raw-file channels samples-rate bytes-per-sample name-format
+	  cue-bin-split -i audio.bin -c 2 -r 44100 -s 2 -f track-%03d.raw
 
-Where format is something like `track_%04d`.
-This will output a bunch of files named accordingly.
-You might then push them through ffmpeg or something to get them to another audio format.
+Would output each track named as `track-001.raw`, `track-002.raw` and so on.
+
+You might then push them through ffmpeg, lame, and/or friends to get them to another audio format such as flac or mp3.
+
+Or if you're feeling high on disc space, just prepend a WAV header to the PCM data…
