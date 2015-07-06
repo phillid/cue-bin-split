@@ -28,6 +28,11 @@
 #ifndef CUE_BIN_SPLIT_H
 #define CUE_BIN_SPLIT_H
 
+#include <stdio.h>
+#include <stdlib.h>
+#include <limits.h>
+#include <getopt.h>
+
 #define FRAMES_PER_SEC 75
 #define BUFFER_SIZE    1024*1024 /* Meh, good enough */
 

@@ -25,11 +25,6 @@
  * SUCH DAMAGE.
  */
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <assert.h>
-#include <getopt.h>
-
 #include "cue-bin-split.h"
 #include "misc.h"
 
@@ -51,7 +46,7 @@ int main(int argc, char **argv)
 	char out_fname[1024]; /* That should do it. Note: overflow IS caught */
 	int track = 0;
 	int items = 0;
-	int i = 0;
+	unsigned long i = 0;
 	char buffer[BUFFER_SIZE];
 
 	/* Timestamp building blocks */
@@ -107,7 +102,7 @@ int main(int argc, char **argv)
 
 	track = 0;
 	items = get_stamp(&mm, &ss, &ff); /* FIXME doesn't check return value */
-	start_sec = (double)mm*60 + (double)ss + ((double)ff)/FRAMES_PER_SEC;
+	start_sec = mm*60 + ss + ((double)ff)/FRAMES_PER_SEC;
 
 	while ( ( items = get_stamp(&mm, &ss, &ff) ) )
 	{
@@ -136,38 +131,49 @@ int main(int argc, char **argv)
 				fprintf(stderr, "Timestamp #%d malformed\n", track);
 				break;
 			}
-			finish_sec = (double)mm*60 + (double)ss + ((double)ff)/75;
+			finish_sec = mm*60 + ss + ((double)ff)/75;
 			printf("%s starts %f s, finishes %f s\n", out_fname, start_sec, finish_sec);
 		}
 
 		start_sample = start_sec * rate * channels;
 		finish_sample = finish_sec * rate * channels;
 
-		if (start_s > finish_s)
+		if (start_sample > finish_sample)
 		{
 			fprintf(stderr, "ERROR: Finish time can't be before start time, skipping %s", out_fname);
 			continue;
 		}
 
+		/* Run to "infinity" if no finish time set.
+		 * Of course, will actually run to EOF assuming file's small enough */
+		if (finish_sec == -1)
+			finish_sample = ULONG_MAX;
 
-		/* FIXME this copies whole buffers, potentially going over end of track */
-		for (i = (int)start_sample; i != (int)finish_sample; i += items)
+		for (i = start_sample; i < finish_sample; i += items)
 		{
-			if ((items = fread(buffer, sample_size, sizeof(buffer)/sample_size, fin)))
+			/* FIXME perror on items == 0 after read */
+			items = fread(buffer,
+			              sample_size,
+			              MIN(sizeof(buffer)/sample_size, (finish_sample - i)),
+			              fin);
+			if (feof(fin))
+				break;
+
+			if ( fwrite(buffer, sample_size, items, fout) != items)
 			{
-				if (feof(fin))
-					break;
-				fwrite(buffer, items, sample_size, fout);
+				fprintf(stderr, "Write to %s failed: ", out_fname);
+				perror("fwrite");
+				break;
 			}
 		}
 
 		fclose(fout);
 		start_sec = finish_sec;
 
-		/* FIXME ick */
-		if (finish_sec < 0)
+		/* finish_sample was ULONG_MAX if this was a run to EOF (last track) 
+		 * so don't bother looping around */
+		if (finish_sample == ULONG_MAX)
 			break;
 	}
 	return 0;
 }
-

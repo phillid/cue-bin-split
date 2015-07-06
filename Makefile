@@ -15,7 +15,7 @@ all: cue-bin-split
 cue-bin-split: $(OBJECTS)
 	$(CC) -o $(EXEC_NAME) $^ $(LDFLAGS)
 
-%.o: %.c
+%.o: %.c %.h
 	$(CC) -c -o $@ $< $(CFLAGS)
 
 

@@ -31,6 +31,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#define MIN(a, b) ((a < b)? a : b)
+
 int get_stamp(int *m, int *s, int *f);
 void construct_out_name(char *buffer, size_t buffer_size, char* format, unsigned int track);
 void die_help();
