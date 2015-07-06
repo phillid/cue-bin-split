@@ -128,8 +128,6 @@ int main(int argc, char **argv)
 		perror("fopen");
 		return EXIT_FAILURE;
 	}
-	printf("Opened input file '%s'\n", in_fname);
-
 
 	index = 0;
 	items = get_stamp(&mm, &ss, &ff); /* FIXME doesn't check return value */
@@ -147,7 +145,6 @@ int main(int argc, char **argv)
 			return EXIT_FAILURE;
 		}
 
-
 		/* Open output file */
 		if ((fout = fopen(out_fname, "w")) == NULL)
 		{
@@ -156,7 +153,6 @@ int main(int argc, char **argv)
 			fclose(fin);
 			return EXIT_FAILURE;
 		}
-
 
 		/* EOF means this is the last track; run it to end of input file */
 		if (items == EOF)
@@ -171,7 +167,7 @@ int main(int argc, char **argv)
 			}
 			finish_sec = (double)mm*60 + (double)ss + ((double)ff)/75;
 		}
-		fprintf(stderr, "Track %d starts %f s, finishes %f s\n", index, start_sec, finish_sec);
+		printf("%s starts %f s, finishes %f s\n", out_fname, start_sec, finish_sec);
 
 		start_sample = start_sec * rate * channels;
 		finish_sample = finish_sec * rate * channels;
