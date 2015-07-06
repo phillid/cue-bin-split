@@ -82,12 +82,18 @@ int main(int argc, char **argv)
 		}
 	}
 
-
 	if (channels <= 0 ||
 	    rate <= 0 ||
 	    sample_size <= 0)
 	{
-		fprintf(stderr, "ERROR: Channel count, bitrate and sample size must all be positive\n");
+		fprintf(stderr, "ERROR: Channel count, bitrate and sample size must all be present and positive\n");
+		die_help();
+	}
+
+	if (in_fname == NULL ||
+	    format == NULL)
+	{
+		fprintf(stderr, "ERROR: Input filename and output name format must be present\n");
 		die_help();
 	}
 
@@ -122,6 +128,7 @@ int main(int argc, char **argv)
 		if (items == EOF)
 		{
 			finish_sec = -1;
+			printf("%s starts %f s, finished EOF\n", out_fname, start_sec);
 		} else {
 			/* Following track starts at end of last */
 			if (items != 3)
@@ -130,40 +137,34 @@ int main(int argc, char **argv)
 				break;
 			}
 			finish_sec = (double)mm*60 + (double)ss + ((double)ff)/75;
+			printf("%s starts %f s, finishes %f s\n", out_fname, start_sec, finish_sec);
 		}
-		printf("%s starts %f s, finishes %f s\n", out_fname, start_sec, finish_sec);
 
 		start_sample = start_sec * rate * channels;
 		finish_sample = finish_sec * rate * channels;
 
-		/* Seek to first sample of track */
-		fseek(fin, (start_sample * sample_size), SEEK_SET);
-
-		if (finish_sec >= 0)
+		if (start_s > finish_s)
 		{
-			for (i = (int)start_sample; i < (int)finish_sample; i += items)
+			fprintf(stderr, "ERROR: Finish time can't be before start time, skipping %s", out_fname);
+			continue;
+		}
+
+
+		/* FIXME this copies whole buffers, potentially going over end of track */
+		for (i = (int)start_sample; i != (int)finish_sample; i += items)
+		{
+			if ((items = fread(buffer, sample_size, sizeof(buffer)/sample_size, fin)))
 			{
-				if ((items = fread(buffer, sample_size, sizeof(buffer)/sample_size, fin)))
-				{
-					if (feof(fin))
-						break;
-					fwrite(buffer, items, sample_size, fout);
-				}
-			}
-		} else {
-			for (i = (int)start_sample; ; i += items)
-			{
-				if ((items = fread(buffer, sample_size, sizeof(buffer)/sample_size, fin)))
-				{
-					if (feof(fin))
-						break;
-					fwrite(buffer, items, sample_size, fout);
-				}
+				if (feof(fin))
+					break;
+				fwrite(buffer, items, sample_size, fout);
 			}
 		}
+
 		fclose(fout);
 		start_sec = finish_sec;
 
+		/* FIXME ick */
 		if (finish_sec < 0)
 			break;
 	}
