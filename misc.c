@@ -25,11 +25,21 @@
  * SUCH DAMAGE.
  */
 
-#ifndef CUE_BIN_SPLIT_TIMESTAMP_H
-#define CUE_BIN_SPLIT_TIMESTAMP_H
+#include "misc.h"
 
-#include <stdio.h>
+int get_stamp(int *m, int *s, int *f)
+{
+	int foo = 0;
+	foo = fscanf(stdin, "%d:%d:%d\n", m, s, f);
+	return foo;
+}
 
-int get_stamp(int *m, int *s, int *f);
-
-#endif
+void construct_out_name(char *buffer, size_t buffer_size, char* format, unsigned int track)
+{
+	if (snprintf(buffer, buffer_size, format, track) == buffer_size)
+	{
+		fprintf(stderr, "Filename too large for buffer (max %zd)\n", buffer_size);
+		return EXIT_FAILURE;
+	}
+	return EXIT_SUCCESS;
+}

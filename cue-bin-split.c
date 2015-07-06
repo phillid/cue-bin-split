@@ -31,7 +31,7 @@
 #include <getopt.h>
 
 #include "cue-bin-split.h"
-#include "timestamp.h"
+#include "misc.h"
 
 
 /* FIXME move me */
@@ -65,7 +65,7 @@ int main(int argc, char **argv)
 	/* Misc */
 	char opt = 0;
 	char out_fname[] = "track-000000000000"; /* That should do it */
-	int index = 0;
+	int track = 0;
 	int items = 0;
 	int i = 0;
 	char buffer[BUFFER_SIZE];
@@ -129,21 +129,15 @@ int main(int argc, char **argv)
 		return EXIT_FAILURE;
 	}
 
-	index = 0;
+	track = 0;
 	items = get_stamp(&mm, &ss, &ff); /* FIXME doesn't check return value */
 	start_sec = (double)mm*60 + (double)ss + ((double)ff)/FRAMES_PER_SEC;
 
 	while ( ( items = get_stamp(&mm, &ss, &ff) ) )
 	{
-		index++;
+		track++;
 
-		i = snprintf(out_fname, sizeof(out_fname), format, index);
-		if (i == sizeof(out_fname))
-		{
-			fprintf(stderr, "Filename too large for buffer\n");
-			fclose(fin);
-			return EXIT_FAILURE;
-		}
+		construct_out_name(out_fname, sizeof(out_fname), format, track);
 
 		/* Open output file */
 		if ((fout = fopen(out_fname, "w")) == NULL)
@@ -162,7 +156,7 @@ int main(int argc, char **argv)
 			/* Following track starts at end of last */
 			if (items != 3)
 			{
-				fprintf(stderr, "Timestamp #%d malformed\n", index);
+				fprintf(stderr, "Timestamp #%d malformed\n", track);
 				break;
 			}
 			finish_sec = (double)mm*60 + (double)ss + ((double)ff)/75;
@@ -172,7 +166,6 @@ int main(int argc, char **argv)
 		start_sample = start_sec * rate * channels;
 		finish_sample = finish_sec * rate * channels;
 
-
 		/* Seek to first sample of track */
 		fseek(fin, (start_sample * sample_size), SEEK_SET);
 
@@ -180,8 +173,6 @@ int main(int argc, char **argv)
 		{
 			for (i = (int)start_sample; i < (int)finish_sample; i += items)
 			{
-				/* FIXME unnecessary call to fwrite with items == 0 possible */
-				/* FIXME Handle EOF properly, silly! */
 				if ((items = fread(buffer, sample_size, sizeof(buffer)/sample_size, fin)))
 				{
 					if (feof(fin))
@@ -192,7 +183,6 @@ int main(int argc, char **argv)
 		} else {
 			for (i = (int)start_sample; ; i += items)
 			{
-				/* FIXME unnecessary call to fwrite with items == 0 possible */
 				if ((items = fread(buffer, sample_size, sizeof(buffer)/sample_size, fin)))
 				{
 					if (feof(fin))
@@ -200,7 +190,6 @@ int main(int argc, char **argv)
 					fwrite(buffer, items, sample_size, fout);
 				}
 			}
-
 		}
 		fclose(fout);
 		start_sec = finish_sec;

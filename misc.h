@@ -25,11 +25,14 @@
  * SUCH DAMAGE.
  */
 
-#include "timestamp.h"
+#ifndef CUE_BIN_SPLIT_TIMESTAMP_H
+#define CUE_BIN_SPLIT_TIMESTAMP_H
 
-int get_stamp(int *m, int *s, int *f)
-{
-	int foo = 0;
-	foo = fscanf(stdin, "%d:%d:%d\n", m, s, f);
-	return foo;
-}
+#include <stdio.h>
+#include <stdlib.h>
+
+int get_stamp(int *m, int *s, int *f);
+void construct_out_name(char *buffer, size_t buffer_size, char* format, unsigned int track);
+
+
+#endif

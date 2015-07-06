@@ -5,7 +5,7 @@ include config.mk
 
 OBJECTS = \
 	cue-bin-split.o \
-	timestamp.o
+	misc.o
 
 CFLAGS += -Wall -Werror
 
