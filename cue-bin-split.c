@@ -38,6 +38,7 @@
 void die_help()
 {
 	fprintf(stderr,
+		"\n"
 		"Options: \n"
 		"  -r bitrate_Hz\n"
 		"  -c channel_count\n"
@@ -116,8 +117,8 @@ int main(int argc, char **argv)
 	    rate <= 0 ||
 	    sample_size <= 0)
 	{
-		fprintf(stderr, "Channel count, bitrate and sample size must all be positive\n");
-		return EXIT_FAILURE;
+		fprintf(stderr, "ERROR: Channel count, bitrate and sample size must all be positive\n");
+		die_help();
 	}
 
 	/* Open it up */
