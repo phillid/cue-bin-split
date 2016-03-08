@@ -1,8 +1,3 @@
-# Makefile for cue-bin-split
-
-.POSIX:
-include config.mk
-
 OBJECTS = \
 	cue-bin-split.o \
 	misc.o
@@ -13,7 +8,7 @@ CFLAGS += -Wall -Werror
 all: cue-bin-split
 
 cue-bin-split: $(OBJECTS)
-	$(CC) -o $(EXEC_NAME) $^ $(LDFLAGS)
+	$(CC) -o $@ $^ $(LDFLAGS)
 
 %.o: %.c %.h
 	$(CC) -c -o $@ $< $(CFLAGS)
