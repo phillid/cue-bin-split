@@ -15,9 +15,6 @@ cue-bin-split: $(OBJECTS)
 
 
 clean:
-	rm -f cue-bin-split
-
-distclean: clean
-	rm -f *.o
+	rm -vf cue-bin-split *.o
 
 .PHONY: all clean
