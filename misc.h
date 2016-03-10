@@ -25,8 +25,8 @@
  * SUCH DAMAGE.
  */
 
-#ifndef CUE_BIN_SPLIT_TIMESTAMP_H
-#define CUE_BIN_SPLIT_TIMESTAMP_H
+#ifndef MISC_H
+#define MISC_H
 
 #include <stdio.h>
 #include <stdlib.h>
