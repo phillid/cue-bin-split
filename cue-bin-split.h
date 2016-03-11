@@ -29,7 +29,6 @@
 #define CUE_BIN_SPLIT_H
 
 #include <stdio.h>
-#include <stdlib.h>
 #include <limits.h>
 #include <getopt.h>
 

@@ -37,15 +37,13 @@ double get_sec()
 
 	/* EOF means this is the last track; return invalid time */
 	if (items == EOF)
-	{
-		return -1.f;
-	}
+		return -1;
 
 	if (items != 3)
 	{
 		/* FIXME doesn't explicitly close fin from cue-bin-split.c upon exit() */
 		fprintf(stderr, "Timestamp malformed\n");
-		exit(EXIT_FAILURE);
+		exit(-1);
 	}
 	return SEC_FROM_TS(mm, ss, ff);
 }
@@ -53,14 +51,14 @@ double get_sec()
 /* Constructs an output filename in the specified buffer based on the given format and track number
  * Main purpose is to catch buffer overflow with snprintf
  */
-void construct_out_name(char *buffer, size_t buffer_size, char* format, unsigned int track)
+int construct_out_name(char *buffer, size_t buffer_size, char* format, unsigned int track)
 {
 	if (snprintf(buffer, buffer_size, format, track) == buffer_size)
 	{
 		fprintf(stderr, "Filename too large for buffer (max %zd)\n", buffer_size);
-		return EXIT_FAILURE;
+		return -1;
 	}
-	return EXIT_SUCCESS;
+	return 0;
 }
 
 /* Displays the help/syntax message and dies
@@ -77,5 +75,5 @@ void die_help()
 		"  -s size of a single channel's sample (bytes)\n"
 		"  -f name_format (%%d and co are replaced with track number)\n"
 	);
-	exit(EXIT_FAILURE);
+	exit(-1);
 }

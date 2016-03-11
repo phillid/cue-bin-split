@@ -92,7 +92,7 @@ int main(int argc, char **argv)
 	{
 		fprintf(stderr,"Failed to open '%s': ", in_fname);
 		perror("fopen");
-		return EXIT_FAILURE;
+		return -1;
 	}
 
 	track = 0;
@@ -102,7 +102,7 @@ int main(int argc, char **argv)
 	if (start_sec < 0)
 	{
 		fprintf(stderr, "ERROR: At least one start timestamp must be specified\n");
-		return EXIT_FAILURE;
+		return -1;
 	}
 
 	/* finish_sample equals ULONG_MAX if a run was to EOF (the last track) */
@@ -124,7 +124,7 @@ int main(int argc, char **argv)
 			fprintf(stderr,"Failed to open '%s': ", out_fname);
 			perror("fopen");
 			fclose(fin);
-			return EXIT_FAILURE;
+			return -1;
 		}
 
 		start_sample = start_sec * rate * channels;

@@ -38,7 +38,7 @@
 #define SEC_FROM_TS(mm, ss, ff) (mm*60 + ss + ((double)ff)/FRAMES_PER_SEC)
 
 double get_sec();
-void construct_out_name(char *buffer, size_t buffer_size, char* format, unsigned int track);
+int construct_out_name(char *buffer, size_t buffer_size, char* format, unsigned int track);
 void die_help();
 
 
