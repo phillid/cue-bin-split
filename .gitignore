@@ -3,5 +3,4 @@ cue-bin-split
 track_*
 *.bin
 *.cue
-*.sh
 *.raw
