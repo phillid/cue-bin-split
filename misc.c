@@ -75,5 +75,5 @@ void die_help()
 		"  -s size of a single channel's sample (bytes)\n"
 		"  -f name_format (%%d and co are replaced with track number)\n"
 	);
-	exit(-1);
+	exit(1);
 }
