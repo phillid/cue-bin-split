@@ -9,7 +9,7 @@ fail()
 
 pass()
 {
-	echo -e '[\e[0;32mPASS\e[0m] '$i: $@
+	echo -e '[\e[0;32mPASS\e[0m] '$i
 }
 
 check_expected()
