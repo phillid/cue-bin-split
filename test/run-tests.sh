@@ -1,11 +1,15 @@
 #!/bin/sh
 
-EXECUTABLE="$PWD/../cue-bin-split"
 
 fail()
 {
-	echo "[FAIL] $i: $@"
+	echo -e '[\e[1;31mFAIL\e[0m] '$i: $@
 	exit 1
+}
+
+pass()
+{
+	echo -e '[\e[0;32mPASS\e[0m] '$i: $@
 }
 
 check_expected()
@@ -19,6 +23,8 @@ check_expected()
 	fi
 }
 
+pushd $(dirname $0) >/dev/null
+EXECUTABLE="$PWD/../cue-bin-split"
 for i in *.test ; do
 	pushd ${i} >/dev/null
 	( . ./run.sh ) 2>stderr.tmp >stdout.tmp
@@ -29,8 +35,9 @@ for i in *.test ; do
 	check_expected stdout
 	check_expected stderr
 
-	echo "[PASS] $i"
+	pass $i
 
 	rm std{err,out}.tmp
 	popd >/dev/null
 done
+popd >/dev/null

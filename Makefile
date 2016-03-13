@@ -14,6 +14,9 @@ cue-bin-split: $(OBJECTS)
 	$(CC) -c -o $@ $< $(CFLAGS)
 
 
+test: all
+	@./test/run-tests.sh
+
 clean:
 	rm -vf cue-bin-split *.o
 
