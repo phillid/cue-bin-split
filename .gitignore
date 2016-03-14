@@ -1,6 +1,5 @@
 cue-bin-split
 *.o
-track_*
 *.bin
 *.cue
 *.raw
