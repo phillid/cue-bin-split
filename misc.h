@@ -25,12 +25,6 @@
  * SUCH DAMAGE.
  */
 
-#ifndef MISC_H
-#define MISC_H
-
-#include <stdio.h>
-#include <stdlib.h>
-
 #include "cue-bin-split.h"
 
 /* MIN is surely defined in a standard header */
@@ -40,6 +34,3 @@
 double get_sec();
 int construct_out_name(char *buffer, size_t buffer_size, char* format, unsigned int track);
 void die_help();
-
-
-#endif

@@ -25,6 +25,11 @@
  * SUCH DAMAGE.
  */
 
+#include <stdio.h>
+#include <stdlib.h>
+#include <limits.h>
+#include <unistd.h>
+
 #include "cue-bin-split.h"
 #include "misc.h"
 

@@ -25,6 +25,9 @@
  * SUCH DAMAGE.
  */
 
+#include <stdio.h>
+#include <stdlib.h>
+
 #include "misc.h"
 
 /* Grabs a 'mm:ss:ff' stamp from stdin */
