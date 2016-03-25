@@ -20,4 +20,4 @@ test: all
 clean:
 	rm -vf cue-bin-split *.o
 
-.PHONY: all clean
+.PHONY: all clean test
