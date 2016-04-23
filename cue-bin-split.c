@@ -49,7 +49,6 @@ void args_collect(int *argc, char ***argv, int *rate, int *channels, int *sample
 			case '?':
 			default:
 				die_help();
-				break;
 		}
 	}
 
