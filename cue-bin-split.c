@@ -147,7 +147,8 @@ int main(int argc, char **argv)
 		}
 
 		/* Run to "infinity" if no finish time set.
-		 * Of course, will actually run to EOF assuming file's small enough */
+		 * Of course, will actually run to EOF assuming file's small enough
+		 * FIXME assumes last track has less than ULONG_MAX samples */
 		if (finish_sec == -1)
 			finish_sample = ULONG_MAX;
 
