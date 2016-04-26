@@ -118,7 +118,11 @@ int main(int argc, char **argv)
 	while ( finish_sample != ULONG_MAX )
 	{
 		track++;
-		construct_out_name(out_fname, sizeof(out_fname), format, track);
+		if (construct_out_name(out_fname, sizeof(out_fname), format, track) < 0)
+		{
+			fclose(fin);
+			return 1;
+		}
 		finish_sec = get_sec();
 
 		printf("%s starts %f s, finishes ", out_fname, start_sec);
