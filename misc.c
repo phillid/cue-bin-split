@@ -56,7 +56,7 @@ double get_sec()
  */
 int construct_out_name(char *buffer, size_t buffer_size, char* format, unsigned int track)
 {
-	if (snprintf(buffer, buffer_size, format, track) == buffer_size)
+	if (snprintf(buffer, buffer_size, format, track) >= buffer_size - 1)
 	{
 		fprintf(stderr, "Filename too large for buffer (max %zd)\n", buffer_size);
 		return -1;

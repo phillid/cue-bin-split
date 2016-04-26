@@ -141,7 +141,7 @@ int main(int argc, char **argv)
 
 		if (start_sample > finish_sample)
 		{
-			fprintf(stderr, "ERROR: Finish time can't be before start time, skipping %s", out_fname);
+			fprintf(stderr, "ERROR: Finish time can't be before start time, skipping %s\n", out_fname);
 			continue;
 		}
 
