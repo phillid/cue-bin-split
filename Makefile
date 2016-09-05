@@ -1,17 +1,6 @@
-OBJECTS = \
-	cue-bin-split.o \
-
-CFLAGS += -Wall -Werror
-
-
 all: cue-bin-split
 
-cue-bin-split: $(OBJECTS)
-	$(CC) -o $@ $^ $(LDFLAGS)
-
-%.o: %.c %.h
-	$(CC) -c -o $@ $< $(CFLAGS)
-
+cue-bin-split: cue-bin-split.o
 
 test: all
 	@./test/run-tests.sh

@@ -5,4 +5,4 @@ Options:
   -c channel_count
   -i input_file
   -s size of a single channel's sample (bytes)
-  -f name_format (%d and co are replaced with track number)
+  -n output file name (prepended with track number)

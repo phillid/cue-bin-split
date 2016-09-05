@@ -30,9 +30,9 @@ double get_sec()
 /* Constructs an output filename in the specified buffer based on the given format and track number
  * Main purpose is to catch buffer overflow with snprintf
  */
-int construct_out_name(char *buffer, size_t buffer_size, char* format, unsigned int track)
+int construct_out_name(char *buffer, size_t buffer_size, char* name, unsigned int track)
 {
-	if (snprintf(buffer, buffer_size, format, track) >= buffer_size - 1)
+	if (snprintf(buffer, buffer_size, "%03d%s", track, name) >= buffer_size - 1)
 	{
 		fprintf(stderr, "Filename too large for buffer (max %zd)\n", buffer_size);
 		return -1;
@@ -52,15 +52,15 @@ void die_help()
 		"  -c channel_count\n"
 		"  -i input_file\n"
 		"  -s size of a single channel's sample (bytes)\n"
-		"  -f name_format (%%d and co are replaced with track number)\n"
+		"  -n output file name (prepended with track number)\n"
 	);
 	exit(1);
 }
 
-void args_collect(int *argc, char ***argv, int *rate, int *channels, int *sample_size, char **in_fname, char **format)
+void args_collect(int *argc, char ***argv, int *rate, int *channels, int *sample_size, char **in_fname, char **name)
 {
 	char opt = '\0';
-	while ( ( opt = getopt(*argc, *argv, "r:c:i:s:f:") ) != -1 )
+	while ( ( opt = getopt(*argc, *argv, "r:c:i:s:n:") ) != -1 )
 	{
 		switch (opt)
 		{
@@ -68,7 +68,7 @@ void args_collect(int *argc, char ***argv, int *rate, int *channels, int *sample
 			case 'c': *channels = atoi(optarg); break;
 			case 's': *sample_size = atoi(optarg); break;
 			case 'i': *in_fname = optarg; break;
-			case 'f': *format = optarg; break;
+			case 'n': *name = optarg; break;
 
 			case '?':
 			default:
@@ -85,9 +85,9 @@ void args_collect(int *argc, char ***argv, int *rate, int *channels, int *sample
 	}
 
 	if (*in_fname == NULL ||
-	    *format == NULL)
+	    *name == NULL)
 	{
-		fprintf(stderr, "ERROR: Input filename and output name format must be present\n");
+		fprintf(stderr, "ERROR: Input filename and output name must be present\n");
 		die_help();
 	}
 }
@@ -99,7 +99,7 @@ int main(int argc, char **argv)
 	FILE *fout = NULL;
 
 	/* Command line options */
-	char *format = NULL;
+	char *name = NULL;
 	char *in_fname = NULL;
 	int channels = 0;
 	int rate = 0;
@@ -118,7 +118,7 @@ int main(int argc, char **argv)
 	unsigned long start_sample = 0;
 	unsigned long finish_sample = 0;
 
-	args_collect(&argc, &argv, &rate, &channels, &sample_size, &in_fname, &format);
+	args_collect(&argc, &argv, &rate, &channels, &sample_size, &in_fname, &name);
 
 	/* Open it up */
 	if ((fin = fopen(in_fname, "r")) == NULL)
@@ -142,7 +142,7 @@ int main(int argc, char **argv)
 	while ( finish_sample != ULONG_MAX )
 	{
 		track++;
-		if (construct_out_name(out_fname, sizeof(out_fname), format, track) < 0)
+		if (construct_out_name(out_fname, sizeof(out_fname), name, track) < 0)
 		{
 			fclose(fin);
 			return 1;

@@ -20,7 +20,7 @@ files named track_nnnn.
 	  -c channel_count
 	  -i input_file
 	  -s size of a single channel's sample (bytes)
-	  -f name_format (%d and co are replaced with track number)
+	  -n output file name (prepended with track number)
 
 
 ## Sample Usage
@@ -30,9 +30,9 @@ were chopping up a 44100 Hz, two channel, 16 bit audio stream,
 
 	grep "INDEX 01" audio.cue | \
 	  sed -e 's/INDEX 01//g' | \
-	  cue-bin-split -i audio.bin -c 2 -r 44100 -s 2 -f track-%03d.raw
+	  cue-bin-split -i audio.bin -c 2 -r 44100 -s 2 -f -track.raw
 
-Would output each track named as `track-001.raw`, `track-002.raw` and so on.
+Would output each track named as `001-track.raw`, `002-track.raw` and so on.
 
 You might then push them through ffmpeg, lame, and/or friends to get them to
 another audio format such as flac or mp3.

@@ -2,7 +2,7 @@
 
 dd if=/dev/zero of=in.raw bs=1K count=1 2>/dev/null
 
-${EXECUTABLE} -r 1 -c 1 -s 1 -i in.raw -f aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\
+${EXECUTABLE} -r 1 -c 1 -s 1 -i in.raw -n aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\
 aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\
 aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\
 aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\

@@ -1,4 +1,4 @@
-track_1.raw starts 0.000000 s, finishes 1.000000 s
-track_2.raw starts 1.000000 s, finishes 4.000000 s
-track_3.raw starts 4.000000 s, finishes 10.000000 s
-track_4.raw starts 10.000000 s, finishes EOF
+001-track.raw starts 0.000000 s, finishes 1.000000 s
+002-track.raw starts 1.000000 s, finishes 4.000000 s
+003-track.raw starts 4.000000 s, finishes 10.000000 s
+004-track.raw starts 10.000000 s, finishes EOF
