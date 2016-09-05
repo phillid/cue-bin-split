@@ -57,41 +57,6 @@ void die_help()
 	exit(1);
 }
 
-void args_collect(int *argc, char ***argv, int *rate, int *channels, int *sample_size, char **in_fname, char **name)
-{
-	char opt = '\0';
-	while ( ( opt = getopt(*argc, *argv, "r:c:i:s:n:") ) != -1 )
-	{
-		switch (opt)
-		{
-			case 'r': *rate = atoi(optarg); break;
-			case 'c': *channels = atoi(optarg); break;
-			case 's': *sample_size = atoi(optarg); break;
-			case 'i': *in_fname = optarg; break;
-			case 'n': *name = optarg; break;
-
-			case '?':
-			default:
-				die_help();
-		}
-	}
-
-	if (*channels <= 0 ||
-	    *rate <= 0 ||
-	    *sample_size <= 0)
-	{
-		fprintf(stderr, "ERROR: Channel count, bitrate and sample size must all be present and positive\n");
-		die_help();
-	}
-
-	if (*in_fname == NULL ||
-	    *name == NULL)
-	{
-		fprintf(stderr, "ERROR: Input filename and output name must be present\n");
-		die_help();
-	}
-}
-
 int main(int argc, char **argv)
 {
 	/* File handles */
@@ -106,6 +71,7 @@ int main(int argc, char **argv)
 	int sample_size = 0;
 
 	/* Misc */
+	char opt = '\0';
 	char out_fname[1024]; /* That should do it. Note: overflow IS caught */
 	int track = 0;
 	int items = 0;
@@ -118,7 +84,36 @@ int main(int argc, char **argv)
 	unsigned long start_sample = 0;
 	unsigned long finish_sample = 0;
 
-	args_collect(&argc, &argv, &rate, &channels, &sample_size, &in_fname, &name);
+	while ( ( opt = getopt(argc, argv, "r:c:i:s:n:") ) != -1 )
+	{
+		switch (opt)
+		{
+			case 'r': rate = atoi(optarg); break;
+			case 'c': channels = atoi(optarg); break;
+			case 's': sample_size = atoi(optarg); break;
+			case 'i': in_fname = optarg; break;
+			case 'n': name = optarg; break;
+
+			case '?':
+			default:
+				die_help();
+		}
+	}
+
+	if (channels <= 0 ||
+	    rate <= 0 ||
+	    sample_size <= 0)
+	{
+		fprintf(stderr, "ERROR: Channel count, bitrate and sample size must all be present and positive\n");
+		die_help();
+	}
+
+	if (in_fname == NULL ||
+	    name == NULL)
+	{
+		fprintf(stderr, "ERROR: Input filename and output name must be present\n");
+		die_help();
+	}
 
 	/* Open it up */
 	if ((fin = fopen(in_fname, "r")) == NULL)
