@@ -1,6 +1,5 @@
 OBJECTS = \
 	cue-bin-split.o \
-	misc.o
 
 CFLAGS += -Wall -Werror
 
