@@ -4,7 +4,6 @@
 #include <unistd.h>
 
 #define MIN(a, b) ((a < b)? a : b)
-#define SEC_FROM_TS(mm, ss, ff) (mm*60 + ss + ((double)ff)/FRAMES_PER_SEC)
 #define FRAMES_PER_SEC 75
 #define BUFFER_SIZE    1024*1024 /* Meh, good enough */
 
@@ -22,11 +21,10 @@ double get_sec()
 
 	if (items != 3)
 	{
-		/* FIXME doesn't explicitly close fin from cue-bin-split.c upon exit() */
 		fprintf(stderr, "Timestamp malformed\n");
 		exit(-1);
 	}
-	return SEC_FROM_TS(mm, ss, ff);
+	return (mm*60 + ss + ((double)ff)/FRAMES_PER_SEC);
 }
 
 /* Constructs an output filename in the specified buffer based on the given format and track number
