@@ -19,8 +19,7 @@ double get_sec()
 	if (items == EOF)
 		return -1;
 
-	if (items != 3)
-	{
+	if (items != 3) {
 		fprintf(stderr, "Timestamp malformed\n");
 		exit(-1);
 	}
@@ -32,8 +31,7 @@ double get_sec()
  */
 int construct_out_name(char *buffer, size_t buffer_size, char* name, unsigned int track)
 {
-	if (snprintf(buffer, buffer_size, "%03d%s", track, name) >= buffer_size - 1)
-	{
+	if (snprintf(buffer, buffer_size, "%03d%s", track, name) >= buffer_size - 1) {
 		fprintf(stderr, "Filename too large for buffer (max %zd)\n", buffer_size);
 		return -1;
 	}
@@ -84,40 +82,35 @@ int main(int argc, char **argv)
 	unsigned long start_sample = 0;
 	unsigned long finish_sample = 0;
 
-	while ( ( opt = getopt(argc, argv, "r:c:i:s:n:") ) != -1 )
-	{
-		switch (opt)
-		{
-			case 'r': rate = atoi(optarg); break;
-			case 'c': channels = atoi(optarg); break;
-			case 's': sample_size = atoi(optarg); break;
-			case 'i': in_fname = optarg; break;
-			case 'n': name = optarg; break;
+	while ((opt = getopt(argc, argv, "r:c:i:s:n:")) != -1) {
+		switch (opt) {
+		case 'r': rate = atoi(optarg); break;
+		case 'c': channels = atoi(optarg); break;
+		case 's': sample_size = atoi(optarg); break;
+		case 'i': in_fname = optarg; break;
+		case 'n': name = optarg; break;
 
-			case '?':
-			default:
-				die_help();
+		case '?':
+		default:
+			die_help();
 		}
 	}
 
 	if (channels <= 0 ||
 	    rate <= 0 ||
-	    sample_size <= 0)
-	{
+	    sample_size <= 0) {
 		fprintf(stderr, "ERROR: Channel count, bitrate and sample size must all be present and positive\n");
 		die_help();
 	}
 
 	if (in_fname == NULL ||
-	    name == NULL)
-	{
+	    name == NULL) {
 		fprintf(stderr, "ERROR: Input filename and output name must be present\n");
 		die_help();
 	}
 
 	/* Open it up */
-	if ((fin = fopen(in_fname, "r")) == NULL)
-	{
+	if ((fin = fopen(in_fname, "r")) == NULL) {
 		fprintf(stderr,"Failed to open '%s': ", in_fname);
 		perror("fopen");
 		return -1;
@@ -127,18 +120,15 @@ int main(int argc, char **argv)
 	start_sec = get_sec();
 
 	/* Start time can't be unspecified, only finish */
-	if (start_sec < 0)
-	{
+	if (start_sec < 0) {
 		fprintf(stderr, "ERROR: At least one start timestamp must be specified\n");
 		return -1;
 	}
 
 	/* finish_sample equals ULONG_MAX if a run was to EOF (the last track) */
-	while ( finish_sample != ULONG_MAX )
-	{
+	while (finish_sample != ULONG_MAX) {
 		track++;
-		if (construct_out_name(out_fname, sizeof(out_fname), name, track) < 0)
-		{
+		if (construct_out_name(out_fname, sizeof(out_fname), name, track) < 0) {
 			fclose(fin);
 			return 1;
 		}
@@ -151,8 +141,7 @@ int main(int argc, char **argv)
 			printf("%f s\n", finish_sec);
 
 		/* Open output file */
-		if ((fout = fopen(out_fname, "w")) == NULL)
-		{
+		if ((fout = fopen(out_fname, "w")) == NULL) {
 			fprintf(stderr,"Failed to open '%s': ", out_fname);
 			perror("fopen");
 			fclose(fin);
@@ -162,8 +151,7 @@ int main(int argc, char **argv)
 		start_sample = start_sec * rate * channels;
 		finish_sample = finish_sec * rate * channels;
 
-		if (start_sample > finish_sample)
-		{
+		if (start_sample > finish_sample) {
 			fprintf(stderr, "ERROR: Finish time can't be before start time, skipping %s\n", out_fname);
 			continue;
 		}
@@ -174,27 +162,23 @@ int main(int argc, char **argv)
 		if (finish_sec == -1)
 			finish_sample = ULONG_MAX;
 
-		for (i = start_sample; i < finish_sample; i += items)
-		{
+		for (i = start_sample; i < finish_sample; i += items) {
 			items = fread(buffer,
 			              sample_size,
 			              MIN(sizeof(buffer)/sample_size, (finish_sample - i)),
 			              fin);
 
-			if (items == 0)
-			{
+			if (items == 0) {
 				if (feof(fin))
 					break;
 
-				if (ferror(fin))
-				{
+				if (ferror(fin)) {
 					perror("fread");
 					break;
 				}
 			}
 
-			if (fwrite(buffer, sample_size, items, fout) != items)
-			{
+			if (fwrite(buffer, sample_size, items, fout) != items) {
 				fprintf(stderr, "Write to %s failed: ", out_fname);
 				perror("fwrite");
 				break;
