@@ -9,7 +9,7 @@ an absolute showstopper, I'm working on changing this when I get the free time
 here and there.
 
 This tool takes a list of times (mm:ss:ff) from stdin and (blindly) outputs
-files named track_nnnn.
+files named according to the track number.
 **It will overwrite any existing file with the same name**
 
 
